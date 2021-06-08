@@ -19,5 +19,14 @@ defmodule Account do
     end
   end
 
+  def withdraw(account, amount) do
+    cond do
+      balance_validation(account.balance, amount) -> {:error, "Saldo insuficiente!"}
+      true ->
+        account = %Account{account | balance: account.balance - amount}
+        {:ok, account, "mensagem de email encaminhada"}
+    end
+  end
+
   defp balance_validation(balance, amount), do: balance < amount
 end
