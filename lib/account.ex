@@ -1,5 +1,5 @@
 defmodule Account do
-  defstruct user: User, balance: nil
+  defstruct user: User, balance: 1000
 
   @accounts "accounts.txt"
 
@@ -27,12 +27,17 @@ defmodule Account do
       balance_validation(from.balance, amount) -> {:error, "Saldo insuficiente!"}
 
       true ->
-        to = search_by_email(to.user.email)
+        accounts = get_accounts()
+
+        accounts = List.delete accounts, from
+        accounts = List.delete accounts, to
 
         from = %Account{from | balance: from.balance - amount}
         to = %Account{to | balance: to.balance + amount}
 
-      [from, to]
+        accounts = accounts ++ [from, to]
+
+        File.write(@accounts, :erlang.term_to_binary(accounts))
     end
   end
 
