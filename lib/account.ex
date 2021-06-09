@@ -1,16 +1,33 @@
 defmodule Account do
   defstruct user: User, balance: nil
 
-  def register(user), do: %__MODULE__{user: user, balance: 1000}
+  @accounts "accounts.txt"
 
-  def transfer(accounts, from, to, amount) do
-    from = Enum.find(accounts, fn account -> account.user.email == from.user.email end)
+  def register(user) do
+    case search_by_email(user.email) do
+      nil ->
+        binary = [%__MODULE__{user: user}] ++ get_accounts()
+        |> :erlang.term_to_binary()
+        File.write(@accounts, binary)
+      _ -> {:error, "Conta já cadastrada"}
+    end
+  end
+
+  def get_accounts do
+    {:ok, binary} = File.read(@accounts)
+    :erlang.binary_to_term(binary)
+  end
+
+  defp search_by_email(email), do: Enum.find(get_accounts(), &(&1.user.email == email))
+
+  def transfer(from, to, amount) do
+    from = search_by_email(from.user.email)
 
     cond do
       balance_validation(from.balance, amount) -> {:error, "Saldo insuficiente!"}
 
       true ->
-        to = Enum.find(accounts, fn account -> account.user.email == to.user.email end)
+        to = search_by_email(to.user.email)
 
         from = %Account{from | balance: from.balance - amount}
         to = %Account{to | balance: to.balance + amount}

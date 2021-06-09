@@ -25,3 +25,6 @@ bank-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+
+# Accounts data
+/accounts.txt
