@@ -25,7 +25,6 @@ defmodule Account do
 
     cond do
       balance_validation(from.balance, amount) -> {:error, "Saldo insuficiente!"}
-
       true ->
         accounts = get_accounts()
 
@@ -45,8 +44,16 @@ defmodule Account do
     cond do
       balance_validation(account.balance, amount) -> {:error, "Saldo insuficiente!"}
       true ->
+        accounts = get_accounts()
+
+        accounts = List.delete accounts, account
         account = %Account{account | balance: account.balance - amount}
-        {:ok, account, "mensagem de email encaminhada"}
+
+        accounts = accounts ++ [account]
+
+        File.write(@accounts, :erlang.term_to_binary(accounts))
+
+        {:ok, account, "Saque realizado com sucesso!"}
     end
   end
 
